@@ -48,6 +48,10 @@ object ImageProcessor {
             val timestamp = System.currentTimeMillis()
             val outputFile = File(context.cacheDir, "landmarked_image_$timestamp.jpg")
 
+            val landmarkList = landmarks?.map {
+                mapOf("x" to it.x(), "y" to it.y(), "z" to it.z())
+            } ?: emptyList()
+
             val out = FileOutputStream(outputFile)
             outputBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
             out.close()
@@ -56,7 +60,7 @@ object ImageProcessor {
 
             return mapOf(
                 "path" to outputFile.absolutePath,
-                "message" to "✅ Landmarks drawn and sent to Flutter"
+                "landmarks" to landmarkList
             )
 
         } else {

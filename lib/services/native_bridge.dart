@@ -7,10 +7,12 @@ class NativeBridge {
     try {
       final result = await _channel.invokeMethod('processImage', {'path': imagePath});
       if (result is Map) {
-        return Map<String, dynamic>.from(result);
+        final parsed = Map<String, dynamic>.from(result);
+        print("📦 Native result received: $parsed");
+        return parsed;
       }
     } catch (e) {
-      print('Native error: $e');
+      print('❌ Native error: $e');
     }
     return null;
   }
