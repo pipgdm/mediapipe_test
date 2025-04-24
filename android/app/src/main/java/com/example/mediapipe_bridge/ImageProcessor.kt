@@ -12,6 +12,9 @@ import java.io.FileOutputStream
 
 import android.content.Context
 
+import com.google.mediapipe.tasks.components.containers.Category
+
+
 
 object ImageProcessor {
 
@@ -52,15 +55,41 @@ object ImageProcessor {
                 mapOf("x" to it.x(), "y" to it.y(), "z" to it.z())
             } ?: emptyList()
 
-            val out = FileOutputStream(outputFile)
-            outputBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
-            out.close()
+            val blendshapesRaw = try {
+                result.result.faceBlendshapes()
+            } catch (e: Exception) {
+                Log.e("Blendshape", "❌ Error calling faceBlendshapes(): ${e.message}")
+                null
+            }
+            
+            var firstFaceBlendshapes: List<Category>? = null
 
+            blendshapesRaw?.ifPresent { blendshapeList ->
+                Log.d("Blendshape", "✅ Blendshape list type: ${blendshapeList::class.qualifiedName}")
+                Log.d("Blendshape", "✅ Blendshape list: $blendshapeList")
+
+                firstFaceBlendshapes = blendshapeList.firstOrNull()
+
+                if (firstFaceBlendshapes != null) {
+                    firstFaceBlendshapes!!.forEachIndexed { index, category ->
+                        Log.d("Blendshape", "🔹 $index → ${category.categoryName()} : ${category.score()}")
+                    }
+                } else {
+                    Log.w("Blendshape", "⚠️ No blendshapes found for first face")
+                }
+            }
+
+            val blendshapeList = firstFaceBlendshapes?.map {
+                mapOf("name" to it.categoryName(), "score" to it.score())
+            } ?: emptyList()
+
+            
             Log.d("FaceLandmarker", "✅ Saved landmarked image to: ${outputFile.absolutePath}")
 
             return mapOf(
                 "path" to outputFile.absolutePath,
-                "landmarks" to landmarkList
+                "landmarks" to landmarkList,
+                "blendshapes" to blendshapeList
             )
 
         } else {

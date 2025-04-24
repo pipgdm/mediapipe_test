@@ -21,6 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final result = await NativeBridge.processImage(pickedFile.path);
 
       if (result != null) {
+        print("🧠 Full native result: $result"); // 👈 Debug log
+
         final path = result['path'] as String?;
         final landmarks = result['landmarks'] as List<dynamic>?;
 
